@@ -1,431 +1,176 @@
 <!DOCTYPE html>
-<html>
+<html lang="ko">
 <head>
-    <meta charset="utf-8">
-    <title>네이버 뉴스 신뢰 지수</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>디지털 신뢰 지수</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
         :root {
-            --bg-gradient-start: #08AEEA;
-            --bg-gradient-end: #2AF598;
-            --card-bg: #ffffff;
-            --text-primary: #1a202c;
-            --text-secondary: #4a5568;
-            --border-color: #e2e8f0;
-            --input-bg: #ffffff;
-            --input-border: #e2e8f0;
-            --input-focus: #08AEEA;
-            --info-bg: #f7fafc;
-            --warning-bg: #fff5f5;
-            --warning-border: #fc8181;
-            --warning-text: #e53e3e;
-            --badge-bg: #edf2f7;
-            --badge-text: #2d3748;
+            --bg: #0f172a;
+            --panel: #111827;
+            --panel-2: #1f2937;
+            --text: #f8fafc;
+            --muted: #94a3b8;
+            --primary: #22d3ee;
+            --accent: #818cf8;
+            --danger: #f87171;
+            --ok: #34d399;
+            --border: #334155;
         }
-        
-        [data-theme="dark"] {
-            --bg-gradient-start: #075c78;
-            --bg-gradient-end: #1c8c5c;
-            --card-bg: #2d3748;
-            --text-primary: #f7fafc;
-            --text-secondary: #cbd5e0;
-            --border-color: #4a5568;
-            --input-bg: #1a202c;
-            --input-border: #4a5568;
-            --input-focus: #2AF598;
-            --info-bg: #1a202c;
-            --warning-bg: #742a2a;
-            --warning-border: #fc8181;
-            --warning-text: #feb2b2;
-            --badge-bg: #1a202c;
-            --badge-text: #e2e8f0;
+
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            width: 400px;
+            color: var(--text);
+            font-family: Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: radial-gradient(circle at top right, #1e293b, #020617 70%);
         }
-        
-        body { 
-            width: 340px; 
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
-            background: linear-gradient(135deg, var(--bg-gradient-start) 0%, var(--bg-gradient-end) 100%);
-            color: var(--text-primary);
-            transition: background 0.3s ease;
-            animation: fadeIn 0.3s ease-out;
+
+        .container { padding: 16px; }
+        .card {
+            background: linear-gradient(145deg, rgba(31,41,55,.88), rgba(17,24,39,.92));
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 14px;
+            margin-bottom: 12px;
+            backdrop-filter: blur(8px);
         }
-        
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(-10px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-        
-        #key-setup, #result-container {
-            background: var(--card-bg);
-            border-radius: 0;
-            padding: 60px 24px 24px 24px;
-            position: relative;
-            transition: background 0.3s ease;
-            min-height: 300px;
-        }
-        
-        .theme-controls {
-            position: absolute;
-            top: 16px;
-            right: 16px;
+
+        h1 {
+            margin: 0 0 6px 0;
+            font-size: 18px;
             display: flex;
             align-items: center;
             gap: 8px;
-            z-index: 10;
         }
-        
-        .theme-mode-selector {
-            background: var(--info-bg);
-            border: 2px solid var(--border-color);
-            border-radius: 18px;
-            padding: 3px;
-            display: flex;
-            gap: 2px;
-            transition: all 0.3s ease;
-        }
-        
-        .theme-mode-btn {
-            padding: 5px 10px;
-            font-size: 10px;
-            background: transparent;
-            border: none;
-            border-radius: 14px;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            color: var(--text-secondary);
-            font-weight: 600;
-            width: auto;
-            margin: 0;
-        }
-        
-        .theme-mode-btn:hover {
-            transform: none;
-            box-shadow: none;
-            background: rgba(8, 174, 234, 0.1);
-        }
-        
-        .theme-mode-btn:hover:not(.active) {
-            transform: scale(1.05);
-        }
-        
-        .theme-mode-btn.active {
-            background: linear-gradient(135deg, var(--bg-gradient-start) 0%, var(--bg-gradient-end) 100%);
-            color: white;
-            box-shadow: 0 2px 8px rgba(8, 174, 234, 0.3);
-        }
-        
-        .theme-toggle {
-            background: var(--info-bg);
-            border: 2px solid var(--border-color);
-            border-radius: 20px;
-            width: 44px;
-            height: 24px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            padding: 2px;
-            flex-shrink: 0;
-        }
-        
-        .theme-toggle:hover:not(.disabled) {
-            border-color: var(--input-focus);
-        }
-        
-        .theme-toggle.disabled {
-            opacity: 0.4;
-            cursor: not-allowed;
-        }
-        
-        .theme-toggle-slider {
-            width: 16px;
-            height: 16px;
-            background: linear-gradient(135deg, var(--bg-gradient-start) 0%, var(--bg-gradient-end) 100%);
-            border-radius: 50%;
-            transition: transform 0.3s ease;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 10px;
-        }
-        
-        [data-theme="dark"] .theme-toggle-slider {
-            transform: translateX(20px);
-        }
-        
-        .theme-toggle-slider::after {
-            content: "☀️";
-        }
-        
-        [data-theme="dark"] .theme-toggle-slider::after {
-            content: "🌙";
-        }
-        
-        h3 { 
-            color: var(--text-primary);
-            margin-bottom: 20px;
-            font-size: 17px;
-            font-weight: 700;
-            transition: color 0.3s ease;
-            text-align: center;
-        }
-        
-        h2 {
-            color: var(--text-primary);
-            margin-bottom: 8px;
-            font-size: 19px;
-            font-weight: 700;
-            text-align: center;
-            transition: all 0.3s ease;
-        }
-        
-        input[type="password"] { 
-            width: 100%; 
-            padding: 12px 14px;
-            margin-bottom: 12px;
-            border: 2px solid var(--input-border);
-            border-radius: 10px;
-            font-size: 13px;
-            transition: all 0.2s ease;
-            outline: none;
-            background: var(--input-bg);
-            color: var(--text-primary);
-        }
-        
-        input[type="password"]:focus {
-            border-color: var(--input-focus);
-            box-shadow: 0 0 0 3px rgba(8, 174, 234, 0.1);
-            transform: scale(1.01);
-        }
-        
-        input[type="password"]:hover {
-            border-color: var(--input-focus);
-            filter: brightness(1.02);
-        }
-        
-        input[type="password"]::placeholder {
-            color: var(--text-secondary);
-            opacity: 0.6;
-        }
-        
-        button { 
-            width: 100%; 
-            padding: 12px 16px;
-            border: none;
-            border-radius: 10px;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            margin-bottom: 8px;
-        }
-        
-        #save-key-button, #change-key-button {
-            background: linear-gradient(135deg, var(--bg-gradient-start) 0%, var(--bg-gradient-end) 100%);
-            color: white;
-            box-shadow: 0 4px 14px rgba(8, 174, 234, 0.35);
-        }
-        
-        #save-key-button:hover, #change-key-button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(8, 174, 234, 0.45);
-            filter: brightness(1.1);
-        }
-        
-        #save-key-button:active, #change-key-button:active {
-            transform: translateY(0);
-            filter: brightness(0.95);
-        }
-        
-        #change-key-button { 
-            margin-top: 20px;
-        }
-        
-        .warning-text {
-            font-size: 10px;
-            color: var(--warning-text);
-            line-height: 1.5;
-            display: flex;
-            align-items: flex-start;
-            gap: 6px;
-            background: var(--warning-bg);
-            padding: 10px 12px;
-            border-radius: 8px;
-            border-left: 3px solid var(--warning-border);
-            margin-top: 4px;
-            transition: all 0.3s ease;
-        }
-        
-        .warning-text::before {
-            content: "⚠";
+
+        .subtitle {
+            color: var(--muted);
             font-size: 12px;
-            flex-shrink: 0;
-        }
-        
-        #result-container { 
-            display: none;
-        }
-        
-        #score-display { 
-            font-size: 48px;
-            font-weight: 900;
-            background: linear-gradient(135deg, var(--bg-gradient-start) 0%, var(--bg-gradient-end) 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            text-align: center;
-            margin: 28px 0 32px 0;
-            letter-spacing: -1px;
-            line-height: 1;
-        }
-        
-        .bias-section {
-            text-align: center;
-            margin-bottom: 24px;
-        }
-        
-        .bias-label {
-            color: var(--text-secondary);
-            font-size: 11px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
             margin-bottom: 10px;
-            font-weight: 600;
-            transition: color 0.3s ease;
         }
-        
-        .bias-badge {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            background: var(--badge-bg);
-            color: var(--badge-text);
-            padding: 10px 24px;
-            border-radius: 20px;
-            font-weight: 700;
-            font-size: 15px;
-            border: 2px solid var(--border-color);
-            transition: all 0.3s ease;
-            min-width: 120px;
-            cursor: default;
-        }
-        
-        .bias-badge:hover {
-            transform: scale(1.05);
-            box-shadow: 0 4px 12px rgba(8, 174, 234, 0.2);
-            border-color: var(--input-focus);
-        }
-        
-        @keyframes pulse {
-            0%, 100% {
-                opacity: 1;
-            }
-            50% {
-                opacity: 0.8;
-            }
-        }
-        
-        #score-display:not(:empty) {
-            animation: pulse 2s ease-in-out infinite;
-        }
-        
-        .divider {
-            height: 1px;
-            background: linear-gradient(to right, transparent, var(--border-color), transparent);
-            margin: 24px 0;
-        }
-        
-        .info-row {
-            background: var(--info-bg);
-            padding: 14px;
+
+        .row { margin-bottom: 10px; }
+        label { display:block; font-size: 12px; color: #cbd5e1; margin-bottom: 5px; }
+
+        input, select {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid var(--border);
+            background: #0b1220;
+            color: var(--text);
             border-radius: 10px;
-            margin-bottom: 16px;
-            border: 1px solid var(--border-color);
-            transition: all 0.3s ease;
-            cursor: default;
-        }
-        
-        .info-row:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-            border-color: var(--input-focus);
-            background: var(--badge-bg);
-        }
-        
-        .info-row strong {
-            display: block;
-            color: var(--text-secondary);
-            font-size: 11px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin-bottom: 8px;
-            font-weight: 600;
-            transition: color 0.3s ease;
-        }
-        
-        #reason-display {
-            color: var(--text-primary);
             font-size: 13px;
-            line-height: 1.7;
-            transition: color 0.3s ease;
         }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px rgba(34,211,238,.2);
+        }
+
+        button {
+            width: 100%;
+            border: 0;
+            border-radius: 10px;
+            padding: 11px 12px;
+            font-weight: 700;
+            cursor: pointer;
+            color: #03131a;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            margin-top: 8px;
+        }
+
+        .secondary {
+            background: #0b1220;
+            color: #cbd5e1;
+            border: 1px solid var(--border);
+        }
+
+        .result-score {
+            font-size: 34px;
+            font-weight: 800;
+            margin: 6px 0;
+            color: var(--primary);
+        }
+
+        .pill {
+            display: inline-block;
+            padding: 6px 10px;
+            border: 1px solid var(--border);
+            border-radius: 999px;
+            font-size: 12px;
+            color: #e2e8f0;
+            background: #0b1220;
+            margin-right: 6px;
+            margin-bottom: 6px;
+        }
+
+        .status { font-size: 12px; color: var(--muted); margin-top: 8px; min-height: 16px; }
+        .warn { color: var(--danger); }
+        .ok { color: var(--ok); }
+        .hidden { display: none; }
     </style>
 </head>
 <body>
-    <div id="key-setup">
-        <div class="theme-controls">
-            <div class="theme-mode-selector">
-                <button class="theme-mode-btn active" data-mode="auto">Auto</button>
-                <button class="theme-mode-btn" data-mode="manual">Manual</button>
+<div class="container">
+    <div class="card">
+        <h1>🦊 디지털 신뢰 지수</h1>
+        <div class="subtitle">MV3 + 멀티 LLM 제공자 (GPT/Claude/Gemini/OpenRouter/Custom)</div>
+
+        <div class="row">
+            <label for="provider-select">제공자 선택</label>
+            <select id="provider-select">
+                <option value="gemini">Gemini</option>
+                <option value="gpt">GPT (OpenAI)</option>
+                <option value="claude">Claude (Anthropic)</option>
+                <option value="openrouter">OpenRouter</option>
+                <option value="custom">Custom(OpenAI-Compatible)</option>
+            </select>
+        </div>
+
+        <div class="row">
+            <label for="model-input">모델명</label>
+            <input id="model-input" type="text" placeholder="예: gemini-2.5-flash-lite">
+        </div>
+
+        <div class="row">
+            <label for="api-key-input">API 키</label>
+            <input id="api-key-input" type="password" placeholder="API 키를 입력하세요">
+        </div>
+
+        <div id="custom-fields" class="hidden">
+            <div class="row">
+                <label for="endpoint-input">Custom Endpoint</label>
+                <input id="endpoint-input" type="text" placeholder="https://.../chat/completions">
             </div>
-            <div class="theme-toggle" id="theme-toggle">
-                <div class="theme-toggle-slider"></div>
+            <div class="row">
+                <label for="header-name-input">인증 헤더 이름</label>
+                <input id="header-name-input" type="text" placeholder="Authorization">
+            </div>
+            <div class="row">
+                <label for="header-prefix-input">헤더 Prefix</label>
+                <input id="header-prefix-input" type="text" placeholder="Bearer ">
             </div>
         </div>
-        <h3>Gemini API Key 설정</h3>
-        <input type="password" id="gemini-api-key" placeholder="여기에 API Key를 입력하세요">
-        <button id="save-key-button">키 저장 및 분석 시작</button>
-        <p class="warning-text">키는 로컬에 저장되나 보안에 취약할 수 있습니다.</p>
+
+        <button id="save-btn">설정 저장</button>
+        <button id="analyze-btn" class="secondary">현재 탭 분석 시작</button>
+        <div id="status" class="status"></div>
     </div>
-    <div id="result-container">
-        <div class="theme-controls">
-            <div class="theme-mode-selector">
-                <button class="theme-mode-btn active" data-mode="auto">Auto</button>
-                <button class="theme-mode-btn" data-mode="manual">Manual</button>
-            </div>
-            <div class="theme-toggle" id="theme-toggle-result">
-                <div class="theme-toggle-slider"></div>
-            </div>
+
+    <div class="card">
+        <div>
+            <span class="pill" id="active-provider-pill">Provider: -</span>
+            <span class="pill" id="bias-pill">성향: -</span>
         </div>
-        <h2>네이버 뉴스 신뢰 지수</h2>
-        <p id="score-display">분석 중...</p>
-        
-        <div class="bias-section">
-            <div class="bias-label">언론사 성향</div>
-            <div class="bias-badge">
-                <span id="bias-display"></span>
-            </div>
-        </div>
-        
-        <div class="divider"></div>
-        
-        <div class="info-row">
-            <strong>분석 근거</strong>
-            <span id="reason-display"></span>
-        </div>
-        
-        <button id="change-key-button">API 키 수정</button>
+        <div class="result-score" id="score-display">-</div>
+        <div id="reason-display" class="subtitle">분석을 시작하면 결과가 표시됩니다.</div>
     </div>
-    <script src="theme.js"></script>
-    <script src="popup.js"></script>
+</div>
+<script src="theme.js"></script>
+<script src="popup.js"></script>
 </body>
 </html>
