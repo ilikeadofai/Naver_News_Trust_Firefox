@@ -1,23 +1,18 @@
 {
-  "manifest_version": 2,
+  "manifest_version": 3,
   "name": "디지털 신뢰 지수",
-  "version": "1.0",
+  "version": "2.0.0",
   "description": "웹페이지의 신뢰 점수 및 언론사 성향을 표시합니다.",
-  "permissions": [
-    "activeTab",
-    "storage",
-    "https://*.naver.com/*",
-    "https://generativelanguage.googleapis.com/*"
-  ],
-  "browser_action": {
+  "permissions": ["activeTab", "storage", "tabs"],
+  "host_permissions": ["https://*/*"],
+  "action": {
     "default_popup": "popup.html",
     "default_icon": {
       "48": "icons/border-48.png"
     }
   },
   "background": {
-    "scripts": ["background.js", "bias_db.js"], 
-    "persistent": false
+    "service_worker": "background.js"
   },
   "content_scripts": [
     {
